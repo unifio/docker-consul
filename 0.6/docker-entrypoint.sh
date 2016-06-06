@@ -11,7 +11,7 @@ set -e
 # to Consul.
 CONSUL_BIND=
 if [ -n "$CONSUL_BIND_INTERFACE" ]; then
-  if [ $CONSUL_BIND_INTERFACE -eq "aws" ]; then
+  if [ "$CONSUL_BIND_INTERFACE" = "aws" ]; then
     CONSUL_BIND_ADDRESS=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
   else
     CONSUL_BIND_ADDRESS=$(ip -o -4 addr list $CONSUL_BIND_INTERFACE | head -n1 | awk '{print $4}' | cut -d/ -f1)
@@ -30,7 +30,7 @@ fi
 # pass the proper -client= option along to Consul.
 CONSUL_CLIENT=
 if [ -n "$CONSUL_CLIENT_INTERFACE" ]; then
-  if [ $CONSUL_CLIENT_INTERFACE -eq "aws" ]; then
+  if [ "$CONSUL_CLIENT_INTERFACE" = "aws" ]; then
     CONSUL_CLIENT_ADDRESS=$(curl http://169.254.169.254/latest/meta-data/local-ipv4)
   else
     CONSUL_CLIENT_ADDRESS=$(ip -o -4 addr list $CONSUL_CLIENT_INTERFACE | head -n1 | awk '{print $4}' | cut -d/ -f1)
