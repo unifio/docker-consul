@@ -39,13 +39,13 @@ fi
 # Set advertisement and node name for use with AWS ECS
 if [ "$DEPLOY_TYPE" = "ecs" ]; then
   ADVERTISE_IP=$(wget -qO- 169.254.169.254/latest/meta-data/local-ipv4)
-  NODE_NAME=$(wget -qO- 169.254.169.254/latest/meta-data/local-hostname)
+  NODE_ID=$(wget -qO- 169.254.169.254/latest/meta-data/instance-id)
 
   CONSUL_AD="-advertise=$ADVERTISE_IP"
   echo "==> Found address '$ADVERTISE_IP' for use with ECS"
 
-  CONSUL_NODE="-node=$NODE_NAME"
-  echo "==> Found name '$NODE_NAME' for use with ECS"
+  CONSUL_NODE="-node=$NODE_ID"
+  echo "==> Found name '$NODE_ID' for use with ECS"
 fi
 
 # CONSUL_DATA_DIR is exposed as a volume for possible persistent storage. The
@@ -75,7 +75,7 @@ if [ "$1" = 'agent' ]; then
         -config-dir="$CONSUL_CONFIG_DIR" \
         $CONSUL_BIND \
         $CONSUL_CLIENT \
-        $CONSUL_NAME \
+        $CONSUL_NODE \
         $CONSUL_AD \
         "$@"
 elif [ "$1" = 'version' ]; then
