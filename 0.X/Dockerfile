@@ -1,8 +1,8 @@
-FROM alpine:3.3
+FROM alpine:3.4
 MAINTAINER James Phillips <james@hashicorp.com> (@slackpad)
 
 # This is the release of Consul to pull in.
-ENV CONSUL_VERSION=0.6.4
+ENV CONSUL_VERSION=0.7.0
 
 # This is the release of https://github.com/hashicorp/docker-base to pull in order
 # to provide HashiCorp-built versions of basic utilities like dumb-init and gosu.
@@ -14,7 +14,7 @@ RUN addgroup consul && \
     adduser -S -G consul consul
 
 # Set up certificates, our base tools, and Consul.
-RUN apk add --no-cache ca-certificates gnupg && \
+RUN apk add --no-cache ca-certificates curl gnupg libcap openssl && \
     gpg --recv-keys 91A6E7F85D05C65630BEF18951852D87348FFC4C && \
     mkdir -p /tmp/build && \
     cd /tmp/build && \
@@ -33,7 +33,7 @@ RUN apk add --no-cache ca-certificates gnupg && \
     unzip -d /bin consul_${CONSUL_VERSION}_linux_amd64.zip && \
     cd /tmp && \
     rm -rf /tmp/build && \
-    apk del gnupg && \
+    apk del gnupg openssl && \
     rm -rf /root/.gnupg
 
 # The /consul/data dir is used by Consul to store state. The agent will be started
@@ -65,7 +65,7 @@ EXPOSE 8400 8500 8600 8600/udp
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 ENTRYPOINT ["docker-entrypoint.sh"]
 
-# By default you'll get a single-node development server that stores everything
-# in RAM, exposes a web UI, and bootstraps itself. Don't use this configuration
-# for production.
-CMD ["agent", "-dev"]
+# By default you'll get an insecure single-node development server that stores
+# everything in RAM, exposes a web UI and HTTP endpoints, and bootstraps itself.
+# Don't use this configuration for production.
+CMD ["agent", "-dev", "-client", "0.0.0.0"]
